@@ -1,6 +1,6 @@
 # maplibre-merge-protocol
 
-A custom protocol for merging geometry with attributes from multiple tile sets in MapLibre.
+A custom protocol for merging geometry with attributes from multiple tilesets in MapLibre.
 
 ## [DEMO](https://maplibre-merge-protocol.js.org)
 

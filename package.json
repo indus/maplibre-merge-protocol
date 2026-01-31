@@ -1,0 +1,38 @@
+{
+  "name": "maplibre-merge-protocol",
+  "version": "1.0.0",
+  "description": "A custom protocol for merging geometry and attributes from multiple tile sets in MapLibre.",
+  "main": "dist/addMergeProtocol.js",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run build:docs && pnpm run build:dist",
+    "build:docs": "esbuild src/index.js --outfile=docs/addMergeProtocol.js",
+    "build:dist": "esbuild src/index.js --outfile=dist/addMergeProtocol.js --target=es2020 --drop:console && esbuild src/index.js --outfile=dist/addMergeProtocol.min.js --minify --target=es2020 --drop:console --sourcemap",
+    "example": "node example/index.js && pnpm dlx serve docs"
+  },
+  "keywords": [
+    "maplibre",
+    "maps",
+    "tiles",
+    "vector-tiles",
+    "merge",
+    "geometry",
+    "attributes",
+    "protocol",
+    "gis",
+    "mapping",
+    "maplibre-gl",
+    "maplibre-gl-js"
+  ],
+  "author": "Stefan Keim (indus)",
+  "license": "UNLICENSED",
+  "private": true,
+  "packageManager": "pnpm@10.7.1",
+  "devDependencies": {
+    "esbuild": "^0.27.2",
+    "pbf": "^4.0.1"
+  }
+}

@@ -1,0 +1,17 @@
+{
+"name": "data/out/vg250_GEM",
+"description": "vg250_GEM",
+"version": "2",
+"minzoom": "4",
+"maxzoom": "9",
+"center": "7.382813,50.063661,9",
+"bounds": "5.866250,47.270124,15.041814,55.058695",
+"antimeridian_adjusted_bounds": "5.866250,47.270124,15.041814,55.058695",
+"type": "overlay",
+"attribution": " BKG (2026), dl-de/by-2-0 (Daten verändert), Datenquelle: https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf",
+"strategies": "[{},{},{},{},{\"tiny_polygons\":200},{\"tiny_polygons\":97},{\"tiny_polygons\":35},{\"tiny_polygons\":18},{\"tiny_polygons\":13},{\"tiny_polygons\":16}]",
+"format": "pbf",
+"generator": "tippecanoe v2.77.0",
+"generator_options": "tippecanoe -f -A ' BKG (2026), dl-de/by-2-0 (Daten verändert), Datenquelle: https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf' -N vg250_GEM -Z 4 -z 9 -P -ps -ah -pf -pk -pC -pg -s EPSG:3857 -e data/out/vg250_GEM data/tmp/vg250_GEM.geojson",
+"json": "{\"vector_layers\":[{\"id\":\"vg250_GEM\",\"description\":\"\",\"minzoom\":4,\"maxzoom\":9,\"fields\":{\"ARS\":\"String\",\"EWZ\":\"Number\",\"KFL\":\"Number\"}}]}"
+}

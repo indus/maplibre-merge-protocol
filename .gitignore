@@ -1,0 +1,7 @@
+# Node modules
+node_modules/
+.pnpm-store/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*

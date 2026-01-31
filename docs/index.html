@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>maplibre-merge-protocol demo</title>
+    <link rel="icon" href="data:,">
+
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@5.17.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@5.17.0/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font: 12px / 20px Helvetica Neue, Arial, Helvetica, sans-serif;
+        }
+
+        #map {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* Overlay box */
+        .overlay {
+            position: absolute;
+            max-width: 600px;
+            padding: 12px 16px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-sizing: content-box;
+            color: #000;
+            margin: 10px;
+        }
+
+        h1,
+        p {
+            margin: .1em 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <!-- Description overlay -->
+    <div class="overlay">
+        <h1>maplibre-merge-protocol demo</h1>
+        <p>The geometry in this layer are merged with attributes from multiple vector tile sources.
+        <p>
+            <a href="https://github.com/yourusername/ML-TileMerge" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+
+    <script>
+        // Import custom worker script for merge:// protocol
+        maplibregl.importScriptInWorkers(`${window.location.href}/addMergeProtocol.js`);
+
+        const style = {
+            version: 8,
+            sources: {
+                vg250_GEM_merge: {
+
+                    /*
+                    * To merge Vector Tiles, start with the custom protocol `merge://`,
+                    * then concatenate the tile URLs using `|` as a separator.
+                    *
+                    * Example:
+                    *   `merge://http://geom.pbf|http://attr1.pbf|http://attr2.pbf`
+                    * 
+                    * The first tileset must contain geometry (and may also include attributes).
+                    * All subsequent tilesets should contain attributes only; any geometry is ignored.
+                    */
+
+                    tiles: [`merge://${[
+                        '/data/vg250_GEM_split/{z}/{x}/{y}_geom.pbf',     // geometry only
+                        '/data/vg250_GEM_split/{z}/{x}/{y}_ARS.pbf',      // id attribute (administrative code)
+                        '/data/vg250_GEM_split/{z}/{x}/{y}_EWZ_KFL.pbf'   // population and area attributes
+                    ].map(t => location.href + t).join('|')}`],
+
+                    type: "vector",
+                    minzoom: 4,
+                    maxzoom: 9,
+                    bounds: [5.86625, 47.270124, 15.041814, 55.058695],
+                    attribution: `
+                        © <a href="https://www.bkg.bund.de" target="_blank" rel="noopener">BKG</a> (2026),
+                        <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener">dl-de/by-2-0</a> (Daten verändert),
+                        Datenquellen: <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf" target="_blank" rel="noopener">VG-NUTS</a>
+                    `
+                }
+            },
+            layers: [
+                {
+                    id: "background",
+                    type: "background",
+                    paint: { "background-color": "#333" }
+                },
+                {
+                    id: "vg250_GEM",
+                    source: "vg250_GEM_merge",
+                    "source-layer": "vg250_GEM",
+                    type: "fill",
+                    paint: {
+                        "fill-color": [
+                            "interpolate",
+                            ["linear"],
+                            ["/", ["get", "EWZ"], ["get", "KFL"]],
+                            0, "#888",
+                            Number.EPSILON, "#ffffcc",
+                            50, "#a1dab4",
+                            200, "#41b6c4",
+                            1000, "#2c7fb8",
+                            5000, "#253494"
+                        ],
+                        "fill-opacity": [
+                            "case",
+                            ["==", ["slice", ["get", "ARS"], 0, 2], "09"],
+                            1,
+                            0.3
+                        ]
+                    }
+                }
+            ]
+        };
+
+        const { minzoom, bounds } = style.sources.vg250_GEM_merge;
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            style,
+            minZoom: minzoom
+        }).fitBounds(bounds, { padding: 40, animate: false });
+
+    </script>
+</body>
+
+</html>

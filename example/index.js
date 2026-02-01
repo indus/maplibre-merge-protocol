@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Stefan Keim
+ * MIT License — see LICENSE file for details
+ */
+
 import fs from 'fs';
 import path from 'path';
 import { globSync } from 'node:fs';

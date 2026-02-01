@@ -1,3 +1,7 @@
+/*!
+ * Copyright (c) 2026 Stefan Keim
+ * MIT License — see LICENSE file for details
+ */
 addProtocol("merge", async (params, abortController) => {
   const urls = params.url.replace("merge://", "").split("|");
   const tiles = await Promise.all(

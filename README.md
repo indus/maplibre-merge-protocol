@@ -82,4 +82,4 @@ The example/demo uses the following data sources:
 
 ## License / Copyright
 
-© 2026 Stefan Keim. All rights reserved. 
+MIT © 2026 Stefan Keim 

@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Stefan Keim
+ * MIT License — see LICENSE file for details
+ */
+
 import Pbf from 'pbf';
 
 export default function splitTile(buffer, splits = [

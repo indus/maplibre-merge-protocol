@@ -30,8 +30,8 @@ addProtocol("merge", async (params, abortController) => {
         }
       } else {
         const valueOffset = bl.values.length;
-        for (let i2 = 0; i2 < al.keys.length; i2++) bl.keys.push(al.keys[i2]);
-        for (let i2 = 0; i2 < al.values.length; i2++) bl.values.push(al.values[i2]);
+        for (let j = 0; j < al.keys.length; j++) bl.keys.push(al.keys[j]);
+        for (let j = 0; j < al.values.length; j++) bl.values.push(al.values[j]);
         for (let j = 0; j < bl.features.length; j++) {
           const tags = bl.features[j].tags;
           const alTags = al.features[j].tags;
@@ -74,68 +74,65 @@ if (!Pbf || !makeRequest) {
 const tile = {
   read(pbf, end) {
     return pbf.readFields((tag, obj, pbf2) => {
-      if (tag === 3) obj.layers.push(tile.layer.read(pbf2, pbf2.readVarint() + pbf2.pos));
+      if (tag === 3) obj.layers.push(tile.readL(pbf2, pbf2.readVarint() + pbf2.pos));
     }, { layers: [] }, end);
   },
   write(obj, pbf) {
-    if (obj.layers) for (let i = 0; i < obj.layers.length; i++) pbf.writeMessage(3, tile.layer.write, obj.layers[i]);
+    if (obj.layers) for (let i = 0; i < obj.layers.length; i++) pbf.writeMessage(3, tile.writeL, obj.layers[i]);
   },
-  value: {
-    read(pbf, end) {
-      return pbf.readFields((tag, obj, pbf2) => {
-        if (tag === 1) obj.string = pbf2.readString();
-        else if (tag === 2) obj.float = pbf2.readFloat();
-        else if (tag === 3) obj.double = pbf2.readDouble();
-        else if (tag === 4) obj.int = pbf2.readVarint(true);
-        else if (tag === 5) obj.uint = pbf2.readVarint();
-        else if (tag === 6) obj.sint = pbf2.readSVarint();
-        else if (tag === 7) obj.bool = pbf2.readBoolean();
-      }, {}, end);
-    },
-    write(obj, pbf) {
-      if (obj.string !== void 0) pbf.writeStringField(1, obj.string);
-      else if (obj.float !== void 0) pbf.writeFloatField(2, obj.float);
-      else if (obj.double !== void 0) pbf.writeDoubleField(3, obj.double);
-      else if (obj.int !== void 0) pbf.writeVarintField(4, obj.int);
-      else if (obj.uint !== void 0) pbf.writeVarintField(5, obj.uint);
-      else if (obj.sint !== void 0) pbf.writeSVarintField(6, obj.sint);
-      else if (obj.bool !== void 0) pbf.writeBooleanField(7, obj.bool);
-    }
+  // value
+  readV(pbf, end) {
+    return pbf.readFields((tag, obj, pbf2) => {
+      if (tag === 1) obj.string = pbf2.readString();
+      else if (tag === 2) obj.float = pbf2.readFloat();
+      else if (tag === 3) obj.double = pbf2.readDouble();
+      else if (tag === 4) obj.int = pbf2.readVarint(true);
+      else if (tag === 5) obj.uint = pbf2.readVarint();
+      else if (tag === 6) obj.sint = pbf2.readSVarint();
+      else if (tag === 7) obj.bool = pbf2.readBoolean();
+    }, {}, end);
   },
-  feature: {
-    read(pbf, end) {
-      return pbf.readFields((tag, obj, pbf2) => {
-        if (tag === 1) obj.id = pbf2.readVarint();
-        else if (tag === 2) pbf2.readPackedVarint(obj.tags);
-        else if (tag === 3) obj.type = pbf2.readVarint();
-        else if (tag === 4) pbf2.readPackedVarint(obj.geometry);
-      }, { id: 0, tags: [], type: 0, geometry: [] }, end);
-    },
-    write(obj, pbf) {
-      if (obj.id) pbf.writeVarintField(1, obj.id);
-      if (obj.tags) pbf.writePackedVarint(2, obj.tags);
-      if (obj.type) pbf.writeVarintField(3, obj.type);
-      if (obj.geometry) pbf.writePackedVarint(4, obj.geometry);
-    }
+  writeV(obj, pbf) {
+    if (obj.string !== void 0) pbf.writeStringField(1, obj.string);
+    else if (obj.float !== void 0) pbf.writeFloatField(2, obj.float);
+    else if (obj.double !== void 0) pbf.writeDoubleField(3, obj.double);
+    else if (obj.int !== void 0) pbf.writeVarintField(4, obj.int);
+    else if (obj.uint !== void 0) pbf.writeVarintField(5, obj.uint);
+    else if (obj.sint !== void 0) pbf.writeSVarintField(6, obj.sint);
+    else if (obj.bool !== void 0) pbf.writeBooleanField(7, obj.bool);
   },
-  layer: {
-    read(pbf, end) {
-      return pbf.readFields((tag, obj, pbf2) => {
-        if (tag === 2) obj.features.push(tile.feature.read(pbf2, pbf2.readVarint() + pbf2.pos));
-        else if (tag === 3) obj.keys.push(pbf2.readString());
-        else if (tag === 4) obj.values.push(tile.value.read(pbf2, pbf2.readVarint() + pbf2.pos));
-        else if (tag === 1) obj.name = pbf2.readString();
-        else if (tag === 5) obj.extent = pbf2.readVarint();
-        else if (tag === 15) obj.version = pbf2.readVarint();
-      }, { version: 0, name: "", features: [], keys: [], values: [], extent: 0 }, end);
-    },
-    write(obj, pbf) {
-      if (obj.version) pbf.writeVarintField(15, obj.version);
-      if (obj.name) pbf.writeStringField(1, obj.name);
-      if (obj.features) for (let i = 0; i < obj.features.length; i++) pbf.writeMessage(2, tile.feature.write, obj.features[i]);
-      if (obj.keys) for (let i = 0; i < obj.keys.length; i++) pbf.writeStringField(3, obj.keys[i]);
-      if (obj.values) for (let i = 0; i < obj.values.length; i++) pbf.writeMessage(4, tile.value.write, obj.values[i]);
-      if (obj.extent) pbf.writeVarintField(5, obj.extent);
-    }
+  // feature
+  readF(pbf, end) {
+    return pbf.readFields((tag, obj, pbf2) => {
+      if (tag === 1) obj.id = pbf2.readVarint();
+      else if (tag === 2) pbf2.readPackedVarint(obj.tags);
+      else if (tag === 3) obj.type = pbf2.readVarint();
+      else if (tag === 4) pbf2.readPackedVarint(obj.geometry);
+    }, { id: 0, tags: [], type: 0, geometry: [] }, end);
+  },
+  writeF(obj, pbf) {
+    if (obj.id) pbf.writeVarintField(1, obj.id);
+    if (obj.tags) pbf.writePackedVarint(2, obj.tags);
+    if (obj.type) pbf.writeVarintField(3, obj.type);
+    if (obj.geometry) pbf.writePackedVarint(4, obj.geometry);
+  },
+  // layer
+  readL(pbf, end) {
+    return pbf.readFields((tag, obj, pbf2) => {
+      if (tag === 2) obj.features.push(tile.readF(pbf2, pbf2.readVarint() + pbf2.pos));
+      else if (tag === 3) obj.keys.push(pbf2.readString());
+      else if (tag === 4) obj.values.push(tile.readV(pbf2, pbf2.readVarint() + pbf2.pos));
+      else if (tag === 1) obj.name = pbf2.readString();
+      else if (tag === 5) obj.extent = pbf2.readVarint();
+      else if (tag === 15) obj.version = pbf2.readVarint();
+    }, { version: 0, name: "", features: [], keys: [], values: [], extent: 0 }, end);
+  },
+  writeL(obj, pbf) {
+    if (obj.version) pbf.writeVarintField(15, obj.version);
+    if (obj.name) pbf.writeStringField(1, obj.name);
+    if (obj.features) for (let i = 0; i < obj.features.length; i++) pbf.writeMessage(2, tile.writeF, obj.features[i]);
+    if (obj.keys) for (let i = 0; i < obj.keys.length; i++) pbf.writeStringField(3, obj.keys[i]);
+    if (obj.values) for (let i = 0; i < obj.values.length; i++) pbf.writeMessage(4, tile.writeV, obj.values[i]);
+    if (obj.extent) pbf.writeVarintField(5, obj.extent);
   }
 };

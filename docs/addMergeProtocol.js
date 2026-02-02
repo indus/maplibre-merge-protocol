@@ -10,7 +10,7 @@ addProtocol("merge", async (params, abortController) => {
       return tile.read(new Pbf(resp.data));
     })
   );
-  console.time("merge");
+  console.time(params.url);
   const [geom, ...attrTiles] = tiles;
   for (const attr of attrTiles) {
     if (geom.layers.length !== attr.layers.length) {
@@ -46,7 +46,7 @@ addProtocol("merge", async (params, abortController) => {
   const pbf = new Pbf();
   tile.write(geom, pbf);
   const data = pbf.finish();
-  console.timeEnd("merge");
+  console.timeEnd(params.url);
   return { data };
 });
 let Pbf = self.sharedModule.Pbf;

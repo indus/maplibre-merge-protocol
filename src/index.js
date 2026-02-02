@@ -14,7 +14,7 @@ addProtocol('merge', async (params, abortController) => {
         })
     );
 
-    console.time('merge');
+    console.time(params.url);
 
     const [geom, ...attrTiles] = tiles; // geom at index 0, all others are attr
 
@@ -61,7 +61,7 @@ addProtocol('merge', async (params, abortController) => {
     tile.write(geom, pbf);
     const data = pbf.finish()
 
-    console.timeEnd('merge');
+    console.timeEnd(params.url);
 
     return { data };
 });

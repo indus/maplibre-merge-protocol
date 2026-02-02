@@ -13,8 +13,8 @@ addProtocol('merge', async (params, abortController) => {
             return tile.read(new Pbf(resp.data));
         })
     );
-    
-    console.time('merge');
+
+    console.time(params.url);
 
     const [geom, ...attrTiles] = tiles; // geom at index 0, all others are attr
 
@@ -61,7 +61,7 @@ addProtocol('merge', async (params, abortController) => {
     tile.write(geom, pbf);
     const data = pbf.finish()
 
-    console.timeEnd('merge');
+    console.timeEnd(params.url);
 
     return { data };
 });
@@ -70,11 +70,15 @@ addProtocol('merge', async (params, abortController) => {
 let Pbf = self.sharedModule.Pbf;
 let makeRequest = self.sharedModule.makeRequest;
 
-// find sharedModules in minified version
+// Locate utility functions in `sharedModules` in the minified build,
+// since MapLibre is built with Rollup’s `minifyInternalExports` enabled.
+// The markers have been tested for MapLibre minor versions v4.0–v5.17.
+
 if (!Pbf || !makeRequest) {
     const sharedModule = self.sharedModule;
-    const Pbf_marker = 'Expected varint not more than 10 bytes'     // alt: 'ArrayBuffer.isView'
-    const makeRequest_marker = 'getResponseHeader("Content-Type")'  // alt: 'self.worker.actor.sendAsync'
+
+    const Pbf_marker = 'ArrayBuffer.isView'
+    const makeRequest_marker = 'getResponseHeader("Content-Type")'
 
     for (const key in sharedModule) {
         const item = sharedModule[key];
@@ -83,7 +87,8 @@ if (!Pbf || !makeRequest) {
             const str = item.toString();
 
             if (!Pbf && str.includes(Pbf_marker)) {
-                Pbf = item;
+                // fix for MapLibre minor versions v5.0–v5.3
+                Pbf = typeof new item === "function" ? new item : item
                 if (makeRequest) break;
             }
 

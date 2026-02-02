@@ -51,14 +51,14 @@ let Pbf = self.sharedModule.Pbf;
 let makeRequest = self.sharedModule.makeRequest;
 if (!Pbf || !makeRequest) {
   const sharedModule = self.sharedModule;
-  const Pbf_marker = "Expected varint not more than 10 bytes";
+  const Pbf_marker = "ArrayBuffer.isView";
   const makeRequest_marker = 'getResponseHeader("Content-Type")';
   for (const key in sharedModule) {
     const item = sharedModule[key];
     if (typeof item === "function") {
       const str = item.toString();
       if (!Pbf && str.includes(Pbf_marker)) {
-        Pbf = item;
+        Pbf = typeof new item() === "function" ? new item() : item;
         if (makeRequest) break;
       }
       if (!makeRequest && str.includes(makeRequest_marker)) {

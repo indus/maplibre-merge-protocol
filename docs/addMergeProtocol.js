@@ -10,7 +10,7 @@ addProtocol("merge", async (params, abortController) => {
       return tile.read(new Pbf(resp.data));
     })
   );
-  console.time("merge");
+  console.time(params.url);
   const [geom, ...attrTiles] = tiles;
   for (const attr of attrTiles) {
     if (geom.layers.length !== attr.layers.length) {
@@ -46,21 +46,21 @@ addProtocol("merge", async (params, abortController) => {
   const pbf = new Pbf();
   tile.write(geom, pbf);
   const data = pbf.finish();
-  console.timeEnd("merge");
+  console.timeEnd(params.url);
   return { data };
 });
 let Pbf = self.sharedModule.Pbf;
 let makeRequest = self.sharedModule.makeRequest;
 if (!Pbf || !makeRequest) {
   const sharedModule = self.sharedModule;
-  const Pbf_marker = "Expected varint not more than 10 bytes";
+  const Pbf_marker = "ArrayBuffer.isView";
   const makeRequest_marker = 'getResponseHeader("Content-Type")';
   for (const key in sharedModule) {
     const item = sharedModule[key];
     if (typeof item === "function") {
       const str = item.toString();
       if (!Pbf && str.includes(Pbf_marker)) {
-        Pbf = item;
+        Pbf = typeof new item() === "function" ? new item() : item;
         if (makeRequest) break;
       }
       if (!makeRequest && str.includes(makeRequest_marker)) {

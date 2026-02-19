@@ -75,9 +75,9 @@
                     */
 
                     tiles: [`merge://${[
-                        '/data/vg250_GEM_split/{z}/{x}/{y}_geom.pbf',     // geometry only
-                        '/data/vg250_GEM_split/{z}/{x}/{y}_ARS.pbf',      // id attribute (administrative code)
-                        '/data/vg250_GEM_split/{z}/{x}/{y}_EWZ_KFL.pbf'   // population and area attributes
+                        'data/vg250_GEM_split/{z}/{x}/{y}_geom.pbf',     // geometry only
+                        'data/vg250_GEM_split/{z}/{x}/{y}_ARS.pbf',      // id attribute (administrative code)
+                        'data/vg250_GEM_split/{z}/{x}/{y}_EWZ_KFL.pbf'   // population and area attributes
                     ].map(t => location.href + t).join('|')}`],
 
                     type: "vector",

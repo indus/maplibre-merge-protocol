@@ -10,14 +10,14 @@ addProtocol("merge", async (params, abortController) => {
       return tile.read(new Pbf(resp.data));
     })
   );
-  console.time(params.url);
-  const [geom, ...attrTiles] = tiles;
+  console.time(params.url.replaceAll(location.origin, "."));
+  const [base, ...attrTiles] = tiles;
   for (const attr of attrTiles) {
-    if (geom.layers.length !== attr.layers.length) {
+    if (base.layers.length !== attr.layers.length) {
       throw new Error("Layer count mismatch");
     }
-    for (let i = 0; i < geom.layers.length; i++) {
-      const bl = geom.layers[i];
+    for (let i = 0; i < base.layers.length; i++) {
+      const bl = base.layers[i];
       const al = attr.layers[i];
       if (bl.features.length !== al.features.length) {
         throw new Error(`Feature count mismatch in layer ${i}`);
@@ -44,19 +44,20 @@ addProtocol("merge", async (params, abortController) => {
     }
   }
   const pbf = new Pbf();
-  tile.write(geom, pbf);
+  tile.write(base, pbf);
   const data = pbf.finish();
-  console.timeEnd(params.url);
+  console.timeEnd(params.url.replaceAll(location.origin, "."));
   return { data };
 });
-let Pbf = self.sharedModule.Pbf;
-let makeRequest = self.sharedModule.makeRequest;
+const shMod = self.sharedModule;
+let Pbf = shMod.Pbf;
+let makeRequest = shMod.makeRequest;
+console.time("sharedModules");
 if (!Pbf || !makeRequest) {
-  const sharedModule = self.sharedModule;
   const Pbf_marker = "ArrayBuffer.isView";
   const makeRequest_marker = 'getResponseHeader("Content-Type")';
-  for (const key in sharedModule) {
-    const item = sharedModule[key];
+  for (const key in shMod) {
+    const item = shMod[key];
     if (typeof item === "function") {
       const str = item.toString();
       if (!Pbf && str.includes(Pbf_marker)) {
@@ -73,6 +74,7 @@ if (!Pbf || !makeRequest) {
     throw new Error("Unable to find sharedModules");
   }
 }
+console.timeEnd("sharedModules");
 const tile = {
   read(pbf, end) {
     return pbf.readFields((tag, obj, pbf2) => {
@@ -107,8 +109,10 @@ const tile = {
   readF(pbf, end) {
     return pbf.readFields((tag, obj, pbf2) => {
       if (tag === 1) obj.id = pbf2.readVarint();
-      else if (tag === 2) pbf2.readPackedVarint(obj.tags);
-      else if (tag === 3) obj.type = pbf2.readVarint();
+      else if (tag === 2) {
+        pbf2.readPackedVarint(obj.tags);
+        obj.tags.length % 2 && obj.tags.unshift(0);
+      } else if (tag === 3) obj.type = pbf2.readVarint();
       else if (tag === 4) pbf2.readPackedVarint(obj.geometry);
     }, { id: 0, tags: [], type: 0, geometry: [] }, end);
   },

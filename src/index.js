@@ -14,17 +14,17 @@ addProtocol('merge', async (params, abortController) => {
         })
     );
 
-    console.time(params.url);
+    console.time(params.url.replaceAll(location.origin,'.'));
 
-    const [geom, ...attrTiles] = tiles; // geom at index 0, all others are attr
+    const [base, ...attrTiles] = tiles; // base at index 0, all others are attr
 
     for (const attr of attrTiles) {
-        if (geom.layers.length !== attr.layers.length) {
+        if (base.layers.length !== attr.layers.length) {
             throw new Error('Layer count mismatch');
         }
 
-        for (let i = 0; i < geom.layers.length; i++) {
-            const bl = geom.layers[i];
+        for (let i = 0; i < base.layers.length; i++) {
+            const bl = base.layers[i];
             const al = attr.layers[i];
 
             if (bl.features.length !== al.features.length) {
@@ -58,30 +58,31 @@ addProtocol('merge', async (params, abortController) => {
     }
 
     const pbf = new Pbf();
-    tile.write(geom, pbf);
+    tile.write(base, pbf);
     const data = pbf.finish()
 
-    console.timeEnd(params.url);
+    console.timeEnd(params.url.replaceAll(location.origin,'.'));
 
     return { data };
 });
 
 
-let Pbf = self.sharedModule.Pbf;
-let makeRequest = self.sharedModule.makeRequest;
+const shMod = self.sharedModule;
+let Pbf = shMod.Pbf;
+let makeRequest = shMod.makeRequest;
 
 // Locate utility functions in `sharedModules` in the minified build,
 // since MapLibre is built with Rollup’s `minifyInternalExports` enabled.
 // The markers have been tested for MapLibre minor versions v4.0–v5.17.
 
+console.time("sharedModules")
 if (!Pbf || !makeRequest) {
-    const sharedModule = self.sharedModule;
 
     const Pbf_marker = 'ArrayBuffer.isView'
     const makeRequest_marker = 'getResponseHeader("Content-Type")'
 
-    for (const key in sharedModule) {
-        const item = sharedModule[key];
+    for (const key in shMod) {
+        const item = shMod[key];
 
         if (typeof item === 'function') {
             const str = item.toString();
@@ -103,6 +104,7 @@ if (!Pbf || !makeRequest) {
         throw new Error('Unable to find sharedModules');
     }
 }
+console.timeEnd("sharedModules")
 
 const tile = {
     read(pbf, end) {
@@ -140,7 +142,10 @@ const tile = {
     readF(pbf, end) {
         return pbf.readFields((tag, obj, pbf) => {
             if (tag === 1) obj.id = pbf.readVarint();
-            else if (tag === 2) pbf.readPackedVarint(obj.tags);
+            else if (tag === 2) {
+                pbf.readPackedVarint(obj.tags);
+                obj.tags.length % 2 && obj.tags.unshift(0);
+            }
             else if (tag === 3) obj.type = pbf.readVarint();
             else if (tag === 4) pbf.readPackedVarint(obj.geometry);
         }, { id: 0, tags: [], type: 0, geometry: [] }, end);

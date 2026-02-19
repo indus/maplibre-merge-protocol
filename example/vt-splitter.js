@@ -165,7 +165,7 @@ export const tile = {
                 if (obj.geometry) pbf.writePackedVarint(4, obj.geometry);
             }
             if (attr) {
-                if (obj.tags) pbf.writePackedVarint(2, obj.tags);
+                if (obj.tags) pbf.writePackedVarint(2, obj.tags[0] === 0 ? obj.tags.slice(1) : obj.tags);
             }
         }
     },
@@ -184,20 +184,18 @@ export const tile = {
 
         write(obj, pbf, geom = true, attr = true) {
             if (geom) {
-                if (obj.version) pbf.writeVarintField(15, obj.version);
                 if (obj.name) pbf.writeStringField(1, obj.name);
-            }
-            if (obj.features) {
-                for (let i = 0; i < obj.features.length; i++) {
-                    pbf.writeMessage(2, (featureObj, featurePbf) => tile.feature.write(featureObj, featurePbf, geom, attr), obj.features[i]);
-                }
+                if (obj.extent) pbf.writeVarintField(5, obj.extent);
+                if (obj.version) pbf.writeVarintField(15, obj.version);
             }
             if (attr) {
                 if (obj.keys) for (let i = 0; i < obj.keys.length; i++) pbf.writeStringField(3, obj.keys[i]);
                 if (obj.values) for (let i = 0; i < obj.values.length; i++) pbf.writeMessage(4, tile.value.write, obj.values[i]);
             }
-            if (geom) {
-                if (obj.extent) pbf.writeVarintField(5, obj.extent);
+            if (obj.features) {
+                for (let i = 0; i < obj.features.length; i++) {
+                    pbf.writeMessage(2, (featureObj, featurePbf) => tile.feature.write(featureObj, featurePbf, geom, attr), obj.features[i]);
+                }
             }
         }
     }

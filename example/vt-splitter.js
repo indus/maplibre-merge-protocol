@@ -183,8 +183,8 @@ export const tile = {
         },
 
         write(obj, pbf, geom = true, attr = true) {
+            if (obj.name) pbf.writeStringField(1, obj.name);
             if (geom) {
-                if (obj.name) pbf.writeStringField(1, obj.name);
                 if (obj.extent) pbf.writeVarintField(5, obj.extent);
                 if (obj.version) pbf.writeVarintField(15, obj.version);
             }

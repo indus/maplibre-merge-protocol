@@ -35,6 +35,8 @@ the tile URLs using `|` as a separator.
 
 The first tileset must contain geometry (and may also include attributes).   
 All subsequent tilesets should contain attributes only; any geometry is ignored.
+Also, merging only occurs for layers with matching layer names.
+If the features in both the geometry and attribute layers have a [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) (not an attribute named 'id'), the id gets used for merging, which allows for sparse attribute layers. Without feature ids, the number of features must match, and the merge is based on the order of features in the geometry and attribute layers.
 
 Example:
 ``` JS
@@ -62,6 +64,7 @@ const style = {
 
 In the [example](./example/index.js) folder of this repository, you’ll find code that prepares the split tilesets for the [DEMO](https://maplibre-merge-protocol.js.org).  
 You can try it with the [npm script `example`](./package.json#L14) that runs this code and starts a server to display the output.
+However, a better option may be [Tippecanoe](https://github.com/felt/tippecanoe). Since version 2.76.0, the `tile-join` command includes an undocumented option `--exclude-all-tile-geometries` that allows you to produce attribute layers by excluding the geometry. The opposite, using `--exclude-all-tile-attributes`, was already possible before.
 
 
 ## Motivation

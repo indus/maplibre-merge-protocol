@@ -1,0 +1,17 @@
+{
+"name": "data/out2/vg250_GEM_LAN.mbtiles",
+"description": "vg250_GEM_LAN_id",
+"version": "2",
+"minzoom": "4",
+"maxzoom": "9",
+"center": "7.382813,50.063661,9",
+"bounds": "5.866013,47.269911,15.041828,55.058709",
+"antimeridian_adjusted_bounds": "5.866013,47.269911,15.041828,55.058709",
+"type": "overlay",
+"attribution": "dl-de/by-2-0",
+"strategies": "[{},{},{},{},{\"tiny_polygons\":203},{\"tiny_polygons\":100},{\"tiny_polygons\":37},{\"tiny_polygons\":19},{\"tiny_polygons\":13},{\"tiny_polygons\":16}]",
+"format": "pbf",
+"generator": "tile-join v2.80.0",
+"generator_options": "tippecanoe -f -A dl-de/by-2-0 -N vg250_GEM_LAN -z 9 -Z 4 -P -ps -ah -pf -pk -pC -s EPSG:3857 '--use-attribute-for-id=id' '-x=id' -o data/out2/vg250_GEM_LAN.mbtiles data/tmp/vg250_GEM.geojson data/tmp/vg250_LAN.geojson; tile-join -pC -N vg250_GEM_LAN_id -X -e data/out2/vg250_GEM_LAN_id data/out2/vg250_GEM_LAN.mbtiles",
+"json": "{\"vector_layers\":[{\"id\":\"vg250_GEM\",\"description\":\"\",\"minzoom\":4,\"maxzoom\":9,\"fields\":{}},{\"id\":\"vg250_LAN\",\"description\":\"\",\"minzoom\":4,\"maxzoom\":9,\"fields\":{}}],\"tilestats\":{\"layerCount\":2,\"layers\":[{\"layer\":\"vg250_GEM\",\"count\":76219,\"geometry\":\"Polygon\",\"attributeCount\":0,\"attributes\":[]},{\"layer\":\"vg250_LAN\",\"count\":565,\"geometry\":\"Polygon\",\"attributeCount\":0,\"attributes\":[]}]}}"
+}

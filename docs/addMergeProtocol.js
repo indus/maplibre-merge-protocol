@@ -4,40 +4,65 @@
  */
 addProtocol("merge", async (params, abortController) => {
   const urls = params.url.replace("merge://", "").split("|");
-  const tiles = await Promise.all(
-    urls.map(async (url) => {
-      const resp = await makeRequest({ ...params, url }, abortController);
-      return tile.read(new Pbf(resp.data));
-    })
-  );
+  const tiles = await Promise.all(urls.map(async (url) => {
+    const resp = await makeRequest({ ...params, url }, abortController);
+    return tile.read(new Pbf(resp.data));
+  }));
   console.time(params.url.replaceAll(location.origin, "."));
   const [base, ...attrTiles] = tiles;
+  const baseLayersByName = new Map(base.layers.map((l) => [l.name, l]));
+  const attrLayersByName = /* @__PURE__ */ new Map();
   for (const attr of attrTiles) {
-    if (base.layers.length !== attr.layers.length) {
-      throw new Error("Layer count mismatch");
+    for (const al of attr.layers) {
+      if (!attrLayersByName.has(al.name)) attrLayersByName.set(al.name, []);
+      attrLayersByName.get(al.name).push(al);
     }
-    for (let i = 0; i < base.layers.length; i++) {
-      const bl = base.layers[i];
-      const al = attr.layers[i];
-      if (bl.features.length !== al.features.length) {
-        throw new Error(`Feature count mismatch in layer ${i}`);
-      }
+  }
+  for (const [name, alList] of attrLayersByName) {
+    const bl = baseLayersByName.get(name);
+    if (!bl) throw new Error(`Layer "${name}" not found in base tile`);
+    const blHasIds = bl.features.some((f) => f.id);
+    let blFeaturesById = null;
+    for (const al of alList) {
       const keyOffset = bl.keys.length;
-      if (keyOffset == 0) {
+      let valueOffset = 0;
+      if (keyOffset === 0) {
         bl.keys = al.keys;
         bl.values = al.values;
-        for (let j = 0; j < bl.features.length; j++) {
-          bl.features[j].tags = al.features[j].tags;
-        }
       } else {
-        const valueOffset = bl.values.length;
+        valueOffset = bl.values.length;
         for (let j = 0; j < al.keys.length; j++) bl.keys.push(al.keys[j]);
         for (let j = 0; j < al.values.length; j++) bl.values.push(al.values[j]);
+      }
+      if (blHasIds && al.features.some((f) => f.id)) {
+        if (!blFeaturesById) {
+          blFeaturesById = /* @__PURE__ */ new Map();
+          for (const f of bl.features) blFeaturesById.set(f.id, f);
+        }
+        for (const alFeature of al.features) {
+          const blFeature = blFeaturesById.get(alFeature.id);
+          if (!blFeature) {
+            console.warn(`Feature id ${alFeature.id} not found in base layer "${bl.name}", skipping`);
+            continue;
+          }
+          if (keyOffset === 0) {
+            blFeature.tags = alFeature.tags;
+          } else {
+            const tags = blFeature.tags, alTags = alFeature.tags;
+            for (let k = 0; k < alTags.length; k += 2) tags.push(alTags[k] + keyOffset, alTags[k + 1] + valueOffset);
+          }
+        }
+      } else {
+        if (bl.features.length !== al.features.length) {
+          throw new Error(`No feature ids present and count mismatch in layer "${al.name}"`);
+        }
         for (let j = 0; j < bl.features.length; j++) {
-          const tags = bl.features[j].tags;
-          const alTags = al.features[j].tags;
-          for (let k = 0; k < alTags.length; k += 2) {
-            tags.push(alTags[k] + keyOffset, alTags[k + 1] + valueOffset);
+          const blFeature = bl.features[j], alFeature = al.features[j];
+          if (keyOffset === 0) {
+            blFeature.tags = alFeature.tags;
+          } else {
+            const tags = blFeature.tags, alTags = alFeature.tags;
+            for (let k = 0; k < alTags.length; k += 2) tags.push(alTags[k] + keyOffset, alTags[k + 1] + valueOffset);
           }
         }
       }

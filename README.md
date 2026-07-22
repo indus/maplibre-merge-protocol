@@ -34,9 +34,10 @@ the tile URLs using `|` as a separator.
   ```
 
 The first tileset must contain geometry (and may also include attributes).   
-All subsequent tilesets should contain attributes only; any geometry is ignored.
-Also, merging only occurs for layers with matching layer names.
-If the features in both the geometry and attribute layers have a [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) (not an attribute named 'id'), the id gets used for merging, which allows for sparse attribute layers. Without feature ids, the number of features must match, and the merge is based on the order of features in the geometry and attribute layers.
+All subsequent tilesets should contain attributes only; any geometry is ignored.   
+Merging only occurs for layers with matching layer names.   
+If the features in both the geometry and attribute layers have a [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) (not an attribute named 'id'), the id gets used for merging, which allows for sparse attribute layers.   
+Without feature ids, the number of features must match, and the merge is based on the order of features in the geometry and attribute layers.
 
 Example:
 ``` JS

@@ -58,8 +58,8 @@ const style = {
 };
 ```
 
-Merging only occurs for layers with matching layer names.   
-If the features in both the geometry and attribute layers have a [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) (not an attribute named 'id'), the id gets used for merging, which allows for sparse attribute layers.   
+Merging only happens for layers with matching layer names, witch e.g. allows for multiple layers in the geometry layer and a single layer in the attributes.   
+If the features in both the geometry and attribute layers have a [feature id](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features) (not an attribute named 'id'), the id gets used for merging, which allows for sparse attribute layers as sown in this [demo](https://maplibre-merge-protocol.js.org/index_featureID.html).   
 Without feature ids, the number of features must match, and the merge is based on the order of features in the geometry and attribute layers.
 
 ## Splitting Vector Tiles
